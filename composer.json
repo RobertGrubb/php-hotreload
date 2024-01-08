@@ -1,0 +1,29 @@
+{
+  "name": "robert-grubb/php-hotreload",
+  "description": "Hot reload for scripts that stay alive via CLI.",
+  "keywords": [
+    "hot",
+    "reload"
+  ],
+  "type": "library",
+  "homepage": "https://github.com/RobertGrubb/php-hotreload",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "RobertGrubb",
+      "email": "matt@grubb.com"
+    }
+  ],
+  "require": {
+    "php": ">=8.0.0",
+    "codedungeon/php-cli-colors": "^1.12"
+  },
+  "autoload": {
+    "psr-0": {
+      "HotReload": "src"
+    }
+  },
+  "support": {
+    "email": "matt@grubb.com"
+  }
+}
