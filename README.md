@@ -5,3 +5,7 @@ This is a simple package that will allow you to live reload a script that would 
 # Installing
 
 This is yet to be a package for composer, but will be coming soon.
+
+# Preview
+
+![](preview.png?raw=true)
