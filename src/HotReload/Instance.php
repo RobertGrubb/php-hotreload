@@ -46,12 +46,24 @@ class Instance
     private $hash = false;
 
     /**
+     * @param string arguments
+     * 
+     * String of arguments to run entry file with
+     */
+    private $arguments = false;
+
+    /**
      * Sets up the start time, entry file validation,
      * and then add all of the files of the directory 
      * to the files to check the modified time of.
      */
-    public function __construct($entryFile, $rootDirectory = false, $watch = false, $ignore = [])
-    {
+    public function __construct(
+        $entryFile,
+        $rootDirectory = false,
+        $watch = false,
+        $ignore = [],
+        $arguments = false
+    ) {
         if (!$rootDirectory) {
             throw new \Exception('You must specify a root directory.');
         }
@@ -83,6 +95,10 @@ class Instance
          */
         if (!$this->entryFile) {
             throw new \Exception('Unable to get entryFile');
+        }
+
+        if ($arguments) {
+            $this->arguments = $arguments;
         }
 
         /**
@@ -185,7 +201,7 @@ class Instance
         /**
          * Run the command for the entry php file
          */
-        $command = 'php ' . $this->entryFile;
+        $command = 'php ' . $this->entryFile . ($this->arguments ? ' ' . $this->arguments : '');
         $this->proc = popen($command, 'r');
     }
 
