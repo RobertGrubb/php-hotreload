@@ -57,18 +57,36 @@ class Instance
      * and then add all of the files of the directory 
      * to the files to check the modified time of.
      */
-    public function __construct(
-        $entryFile,
-        $rootDirectory = false,
-        $watch = false,
-        $ignore = [],
-        $arguments = false
-    ) {
-        if (!$rootDirectory) {
+    public function __construct($options = [])
+    {
+
+        /**
+         * Set default options
+         */
+        $defaultOptions = [
+            'entryFile' => false,
+            'entryArguments' => false,
+            'rootDirectory' => false,
+            'watch' => ['.'],
+            'ignore' => []
+        ];
+
+        /**
+         * Merge the options passed with the defaults
+         */
+        $options = array_merge($defaultOptions, $options);
+
+        /**
+         * Check for root directory existence
+         */
+        if (!$options['rootDirectory']) {
             throw new \Exception('You must specify a root directory.');
         }
 
-        if (!$watch) {
+        /**
+         * Check that watch is provided
+         */
+        if (!$options['watch']) {
             throw new \Exception('You must specify an array of directories/files to watch.');
         }
 
@@ -77,8 +95,7 @@ class Instance
         /**
          * Sets the entry file that will be ran
          */
-        $this->entryFile = $entryFile;
-
+        $this->entryFile = $options['entryFile'];
         $this->log('Entry file set to ' . $this->entryFile, 'info');
 
         /**
@@ -97,17 +114,20 @@ class Instance
             throw new \Exception('Unable to get entryFile');
         }
 
-        if ($arguments) {
-            $this->arguments = $arguments;
+        /**
+         * Set arguments if passed
+         */
+        if ($options['entryArguments']) {
+            $this->arguments = $options['entryArguments'];
         }
 
         /**
          * Instantiate new differ
          */
         $this->differ = new DiffChecker([
-            'ROOT'     => $rootDirectory,
-            'WATCH'    => $watch,
-            'IGNORE'   => $ignore
+            'ROOT'     => $options['rootDirectory'],
+            'WATCH'    => $options['watch'],
+            'IGNORE'   => $options['ignore']
         ]);
     }
 

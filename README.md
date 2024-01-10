@@ -21,13 +21,13 @@ require_once __DIR__ . '/vendor/autoload.php';
  * Instantiates new HotReloader and listens for changes on
  * the test.php script.
  */
-$hotReloader = new HotReload\Instance(
-    __DIR__ . '/test.php', // The entry file to be called for the daemon
-    __DIR__, // The root directory to watch changes for
-    ['.'], // The list of files or directories to watch changes for
-    [], // The list of directories/files to ignore for watching
-    '--foo=bar' // String of arguments to run the entry file with (optional)
-);
+$hotReloader = new HotReload\Instance([
+    'entryFile' => __DIR__ . '/test.php', // Entry file to run command
+    'entryArguments' => false, // String of arguments for entry (ex. --foo=bar)
+    'rootDirectory' => __DIR__, // The root directory
+    'watch' => [ '.' ], // List of files/directories to watch (Relative path to root)
+    'ignore' => [ 'ignored' ] // List of files/directories to ignore (Relative path to root)
+]);
 
 /**
  * Start the reload watcher
