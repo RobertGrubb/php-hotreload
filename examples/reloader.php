@@ -10,8 +10,8 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 /**
- * Instantiates new HotReloader and listens for changes on 
- * the test.php script.
+ * Instantiates new HotReloader and listens for changes this directory
+ * except for the ignored directory.
  */
 $hotReloader = new HotReload\Instance([
     'entryFile' => __DIR__ . '/test.php',
