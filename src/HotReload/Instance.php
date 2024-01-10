@@ -53,6 +53,13 @@ class Instance
     private $arguments = false;
 
     /**
+     * @param bool outputLogsFromEntry
+     * 
+     * Whether the entry file logs are outputted via the HotReloader
+     */
+    private $outputLogsFromEntry = false;
+
+    /**
      * Sets up the start time, entry file validation,
      * and then add all of the files of the directory 
      * to the files to check the modified time of.
@@ -68,7 +75,8 @@ class Instance
             'entryArguments' => false,
             'rootDirectory' => false,
             'watch' => ['.'],
-            'ignore' => []
+            'ignore' => [],
+            'outputLogsFromEntry' => false
         ];
 
         /**
@@ -122,6 +130,11 @@ class Instance
         }
 
         /**
+         * Set the logs output flag
+         */
+        $this->outputLogsFromEntry = $options['outputLogsFromEntry'];
+
+        /**
          * Instantiate new differ
          */
         $this->differ = new DiffChecker([
@@ -163,9 +176,11 @@ class Instance
              * Read the stdout from the popen process handler.
              */
             if ($this->proc) {
-                if ($read = fread($this->proc, 2096)) {
-                    $this->log('[' . basename($this->entryFile) . ']: ' . $read);
-                    flush();
+                if ($this->outputLogsFromEntry) {
+                    if ($read = fread($this->proc, 2096)) {
+                        $this->log('[' . basename($this->entryFile) . ']: ' . $read);
+                        flush();
+                    }
                 }
             }
 
