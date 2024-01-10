@@ -2,6 +2,7 @@
 
 namespace HotReload;
 
+use \HotReload\DiffChecker;
 use \Codedungeon\PHPCliColors\Color;
 
 /**
@@ -16,22 +17,6 @@ class Instance
      * This holds the entry file for the watcher
      */
     private $entryFile = false;
-
-    /**
-     * @param array files
-     * 
-     * This holds the list of files to check the modified
-     * time against the start time.
-     */
-    private $files = [];
-
-    /**
-     * @param int startTime
-     * 
-     * A unix timestamp that will be used to check the modified
-     * time of a file against
-     */
-    private $startTime = false;
 
     /**
      * @param handler proc
@@ -49,20 +34,33 @@ class Instance
     private $watcherEnabled = true;
 
     /**
+     * @param instance DiffChecker
+     */
+    private $differ = false;
+
+    /**
+     * @param string hash
+     * 
+     * Stores the current hash of the directory/files to check against
+     */
+    private $hash = false;
+
+    /**
      * Sets up the start time, entry file validation,
      * and then add all of the files of the directory 
      * to the files to check the modified time of.
      */
-    public function __construct($entryFile, $directory = false, $extensions = "/^.*\.(php)$/")
+    public function __construct($entryFile, $rootDirectory = false, $watch = false, $ignore = [])
     {
-        $this->log('Configuring HotReloader...', 'info');
+        if (!$rootDirectory) {
+            throw new \Exception('You must specify a root directory.');
+        }
 
-        /**
-         * Sets the start time to now. Any changes after this
-         * will be what triggers the reload for the entry file
-         * and directory that is passed.
-         */
-        $this->startTime = time();
+        if (!$watch) {
+            throw new \Exception('You must specify an array of directories/files to watch.');
+        }
+
+        $this->log('Configuring HotReloader...', 'info');
 
         /**
          * Sets the entry file that will be ran
@@ -88,22 +86,13 @@ class Instance
         }
 
         /**
-         * Add the entry file to the list of files to check
+         * Instantiate new differ
          */
-        $this->files[] = $entryFile;
-
-        /**
-         * If a directory is passed, find the files with the specified
-         * extensions and add to the files array as files to check the 
-         * modified time against.
-         */
-        if ($directory) {
-            $this->log('Scanning directory ' . $directory . ' for files with extension ' . $extensions, 'info');
-            $this->files = array_merge($this->files, $this->rsearch($directory, $extensions));
-        }
-
-        $this->log('Files to watch:', 'info');
-        $this->log(json_encode($this->files), 'info');
+        $this->differ = new DiffChecker([
+            'ROOT'     => $rootDirectory,
+            'WATCH'    => $watch,
+            'IGNORE'   => $ignore
+        ]);
     }
 
     /**
@@ -123,6 +112,10 @@ class Instance
          */
         $this->runScript($this->entryFile);
         $this->log("HotReloader is now running " . $this->entryFile, 'info');
+        /**
+         * Set the hash
+         */
+        $this->hash = $this->differ->hash();
 
         /**
          * Start the loop for checking if files have
@@ -147,10 +140,15 @@ class Instance
             }
 
             /**
+             * Get the current hash to compare to
+             */
+            $currentHash = $this->differ->hash();
+
+            /**
              * Check if files have been modified. If so, stop the watcher,
              * then start it again.
              */
-            if ($this->filesHaveBeenModified()) {
+            if ($currentHash != $this->hash) {
                 $this->stopWatcher();
                 $this->log("HotReloader is now reloading " . $this->entryFile, 'warning');
                 $this->startWatcher();
@@ -159,8 +157,7 @@ class Instance
     }
 
     /**
-     * This will stop the entryFile process, reset the 
-     * startTime.
+     * This will stop the entryFile process
      */
     public function stopWatcher($stopWatcher = false)
     {
@@ -177,11 +174,6 @@ class Instance
         if ($stopWatcher) {
             $this->watcherEnabled = false;
         }
-
-        /**
-         * Reset the start time to now
-         */
-        $this->startTime = time();
     }
 
     /**
@@ -209,44 +201,5 @@ class Instance
         } else {
             echo "[HotReloader]: " . $text, PHP_EOL;
         }
-    }
-
-    /**
-     * Iterates over an array of files and checks
-     * the modified date against the start time.
-     * 
-     * If any of them have changed, it will return true.
-     */
-    public function filesHaveBeenModified()
-    {
-        $modified = false;
-
-        /**
-         * Iterate through each file in the array and compare
-         * the modified time to the watcher start time.
-         */
-        foreach ($this->files as $file) {
-            if (filemtime($file) > $this->startTime) {
-                $modified = true;
-            }
-        }
-
-        return $modified;
-    }
-
-    /**
-     * Recursive file finder for the directory 
-     * passed in the constructor.
-     */
-    public function rsearch($folder, $pattern)
-    {
-        $dir = new \RecursiveDirectoryIterator($folder);
-        $ite = new \RecursiveIteratorIterator($dir);
-        $files = new \RegexIterator($ite, $pattern, \RegexIterator::GET_MATCH);
-        $fileList = array();
-        foreach ($files as $file) {
-            $fileList[] = $file[0];
-        }
-        return $fileList;
     }
 }
