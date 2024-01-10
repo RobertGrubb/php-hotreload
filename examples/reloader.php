@@ -13,7 +13,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
  * Instantiates new HotReloader and listens for changes on 
  * the test.php script.
  */
-$hotReloader = new HotReload\Instance(__DIR__ . '/test.php', __DIR__, ['.']);
+$hotReloader = new HotReload\Instance(__DIR__ . '/test.php', __DIR__, ['.'], ['ignored']);
 
 /**
  * Start the reload watcher

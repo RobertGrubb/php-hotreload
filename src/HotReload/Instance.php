@@ -140,12 +140,6 @@ class Instance
         while ($this->watcherEnabled === true) {
 
             /**
-             * filemtime is cached, so we need to clear it
-             * when the loop runs through.
-             */
-            clearstatcache();
-
-            /**
              * Read the stdout from the popen process handler.
              */
             if ($this->proc) {

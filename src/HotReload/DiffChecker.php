@@ -31,7 +31,7 @@ class DiffChecker
     {
         $this->ROOT    = $this->addSlash($options["ROOT"]);
         $this->WATCH   = $options["WATCH"];
-        $this->IGNORE  = $options["IGNORE"];
+        $this->IGNORE  = isset($options["IGNORE"]) ? $options["IGNORE"] : [];
     }
 
     /**
@@ -111,7 +111,9 @@ class DiffChecker
         while (false !== ($file = $dir->read())) {
             if ($file != '.' and $file != '..') {
                 if (is_dir($directory . DIRECTORY_SEPARATOR . $file)) {
-                    $files[] = $this->hashDir($directory . DIRECTORY_SEPARATOR . $file);
+                    if (!in_array(basename($file), $this->IGNORE)) {
+                        $files[] = $this->hashDir($directory . DIRECTORY_SEPARATOR . $file);
+                    }
                 } else {
                     $curr_file = $directory . DIRECTORY_SEPARATOR . $file;
                     if (!$this->willBeIgnored($curr_file)) {
