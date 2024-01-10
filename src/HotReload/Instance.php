@@ -76,7 +76,7 @@ class Instance
             'rootDirectory' => false,
             'watch' => ['.'],
             'ignore' => [],
-            'outputLogsFromEntry' => false
+            'outputLogsFromEntry' => true
         ];
 
         /**
